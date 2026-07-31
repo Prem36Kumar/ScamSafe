@@ -1,4 +1,4 @@
-import { NativeModules, NativeEventEmitter } from 'react-native'
+import { NativeModules } from 'react-native'
 
 export type SmsMessage = {
   _id: string
@@ -7,17 +7,17 @@ export type SmsMessage = {
   date: number
 }
 
-// Direct Android ContentResolver via expo-modules
-export function readRecentSms(days = 7): Promise<SmsMessage[]> {
-  return new Promise((resolve) => {
-    try {
-      const since = Date.now() - days * 24 * 60 * 60 * 1000
-      const { RNSmsRetriever } = NativeModules
-      if (RNSmsRetriever?.readInboxMessages) {
-        RNSmsRetriever.readInboxMessages(since, (msgs: SmsMessage[]) => resolve(msgs || []))
-      } else {
-        resolve([])
-      }
-    } catch { resolve([]) }
-  })
+export async function readRecentSms(days = 7): Promise<SmsMessage[]> {
+  try {
+    const { SmsReaderModule } = NativeModules
+    if (!SmsReaderModule) {
+      console.warn('SmsReaderModule not available')
+      return []
+    }
+    const msgs = await SmsReaderModule.getSms(days)
+    return msgs || []
+  } catch (e) {
+    console.error('SMS read error:', e)
+    return []
+  }
 }
