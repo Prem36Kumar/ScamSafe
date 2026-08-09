@@ -7,25 +7,17 @@ export type SmsMessage = {
   date: number
 }
 
-export async function readRecentSms(days = 7): Promise<SmsMessage[]> {
+export async function readRecentSms(): Promise<SmsMessage[]> {
   const { SmsReaderModule } = NativeModules
-  
-  // Debug: show what modules are available
-  console.log('Available modules:', Object.keys(NativeModules).join(', '))
-  
   if (!SmsReaderModule) {
-    Alert.alert(
-      'Module Error',
-      'SmsReaderModule not found. Available: ' + Object.keys(NativeModules).slice(0,5).join(', ')
-    )
+    Alert.alert('Error', 'SMS module not loaded. Please reinstall the app.')
     return []
   }
-  
   try {
-    const msgs = await SmsReaderModule.getSms(days)
-    return msgs || []
+    const msgs = await SmsReaderModule.getSms(1) // only last 1 day
+    return (msgs || []).slice(0, 10) // max 10 messages only
   } catch (e: any) {
-    Alert.alert('SMS Error', e?.message || 'Unknown error')
+    Alert.alert('SMS Error', e?.message || 'Could not read SMS')
     return []
   }
 }

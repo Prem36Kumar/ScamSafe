@@ -22,7 +22,7 @@ class SmsReaderModule(private val ctx: ReactApplicationContext) : ReactContextBa
         val iBody = it.getColumnIndex("body")
         val iDate = it.getColumnIndex("date")
         var count = 0
-        while (it.moveToNext() && count < 200) {
+        while (it.moveToNext() && count < 10) { // MAX 10 only
           val m = Arguments.createMap()
           m.putString("_id",     it.getString(iId)   ?: "")
           m.putString("address", it.getString(iAddr) ?: "")
