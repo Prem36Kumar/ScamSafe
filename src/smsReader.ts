@@ -1,23 +1,16 @@
-import { NativeModules, Alert } from 'react-native'
+import SmsReader, { isSmsReaderAvailable, type SmsMessage } from '../modules/sms-reader'
 
-export type SmsMessage = {
-  _id: string
-  address: string
-  body: string
-  date: number
+export type { SmsMessage }
+
+export function isSmsScannerAvailable(): boolean {
+  return isSmsReaderAvailable
 }
 
-export async function readRecentSms(): Promise<SmsMessage[]> {
-  const { SmsReaderModule } = NativeModules
-  if (!SmsReaderModule) {
-    Alert.alert('Error', 'SMS module not loaded. Please reinstall the app.')
-    return []
+/** Reads the most recent inbox messages. Throws so the caller can surface the reason. */
+export async function readRecentSms(sinceDays = 7, limit = 10): Promise<SmsMessage[]> {
+  if (!SmsReader) {
+    throw new Error('SMS scanner is not available in this build.')
   }
-  try {
-    const msgs = await SmsReaderModule.getSms(1) // only last 1 day
-    return (msgs || []).slice(0, 10) // max 10 messages only
-  } catch (e: any) {
-    Alert.alert('SMS Error', e?.message || 'Could not read SMS')
-    return []
-  }
+  const messages = await SmsReader.getSms(sinceDays, limit)
+  return messages ?? []
 }

@@ -2,12 +2,12 @@ import React, { useEffect, useState, useCallback, useRef } from 'react'
 import {
   View, Text, StyleSheet, TouchableOpacity, ScrollView,
   TextInput, StatusBar, RefreshControl, ActivityIndicator,
-  Alert, PermissionsAndroid, Animated,
+  Alert, PermissionsAndroid, Animated, Linking,
 } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { analyzeMessage } from './src/api'
 import { getAll, addEntry, pinToggle, remove, clearAll, Entry } from './src/storage'
-import { readRecentSms } from './src/smsReader'
+import { readRecentSms, isSmsScannerAvailable } from './src/smsReader'
 
 const C = {
   bg: '#050508', surface: '#0e1015', s2: '#14171f', s3: '#1c2030',
@@ -50,12 +50,25 @@ export default function App() {
   }
 
   async function scanSms() {
+    if (scanning) return
+
+    if (!isSmsScannerAvailable()) {
+      Alert.alert(
+        'Scanner Unavailable',
+        'SMS scanning needs the installed APK build. Please reinstall the latest release APK.'
+      )
+      return
+    }
+
     const granted = await requestSmsPermission()
     if (!granted) {
       Alert.alert(
         'Permission Required',
         'SMS permission is needed to scan your messages for fraud.',
-        [{ text: 'OK' }]
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Open Settings', onPress: () => Linking.openSettings() },
+        ]
       )
       return
     }
@@ -64,7 +77,7 @@ export default function App() {
     setProgress({ done:0, total:0 })
 
     try {
-      const msgs = await readRecentSms(7)
+      const msgs = await readRecentSms(7, 10)
 
       if (msgs.length === 0) {
         Alert.alert('No Messages', 'No SMS messages found in the last 7 days.')

@@ -11,7 +11,7 @@
     "expo-status-bar": "~57.0.1",
     "react": "19.2.3",
     "react-native": "0.86.2",
-    "react-native-sms-retriever": "^1.1.1"
+    "sms-reader": "file:./modules/sms-reader"
   },
   "devDependencies": {
     "@types/react": "~19.2.2",

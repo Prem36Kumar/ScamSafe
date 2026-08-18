@@ -1,0 +1,10 @@
+{
+  "name": "sms-reader",
+  "version": "1.0.0",
+  "description": "Local Expo module that reads the Android SMS inbox for ScamSafe",
+  "main": "index.ts",
+  "private": true,
+  "peerDependencies": {
+    "expo-modules-core": "*"
+  }
+}

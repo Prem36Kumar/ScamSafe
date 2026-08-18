@@ -17,6 +17,13 @@ jobs:
         uses: android-actions/setup-android@v3
       - name: Expo Prebuild
         run: npx expo prebuild --platform android --clean
+      - name: Verify SMS module was autolinked
+        run: |
+          grep -q "sms-reader" android/settings.gradle \
+            || (echo "::error::SmsReader module was not autolinked by prebuild"; exit 1)
+          grep -q "android.permission.READ_SMS" android/app/src/main/AndroidManifest.xml \
+            || (echo "::error::READ_SMS permission missing from generated manifest"; exit 1)
+
       - name: Make gradlew executable
         run: chmod +x android/gradlew
       - name: Build Release APK
